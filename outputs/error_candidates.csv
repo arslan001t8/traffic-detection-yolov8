@@ -1,0 +1,26 @@
+image,gt,correct,missed,wrong_class,false_pos,notes,problems
+212_jpg.rf.554380da46f909bb828,58,11,45,2,12,bus -> three-wheeler; missed bus; missed bus; missed bus; missed bus; bus -> three-wheeler; missed car; missed car; missed car; missed car; missed car; missed bus; missed bus; missed bus; missed bus; missed car; missed bus; missed truck; missed truck; missed car; missed car; missed bus; missed bus; missed bus; missed car; missed car; missed car; missed car; missed car; missed bus; missed bus; missed car; missed car; missed car; missed bus; missed car; missed car; missed car; missed bus; missed truck; missed bus; missed car; missed car; missed bus; missed bus; missed bus; missed bus,59
+Pias-322-_jpg.rf.c9c5b8c59af80,16,7,8,1,1,missed truck; missed three-wheeler; missed three-wheeler; truck -> car; missed car; missed three-wheeler; missed three-wheeler; missed bus; missed bus,10
+Navid_62_jpg.rf.b00cb9dee34b3d,5,3,2,0,8,missed bus; missed motorcycle,10
+Asraf_12_jpg.rf.47fe0a1896914d,10,2,7,1,1,truck -> car; missed car; missed bus; missed bus; missed bus; missed three-wheeler; missed bus; missed truck,9
+Dipto_-57_jpg.rf.9b8df7e58be80,8,4,2,2,4,truck -> car; three-wheeler -> truck; missed car; missed car,8
+Pias-191-_jpg.rf.637a97727ecb8,7,5,2,0,6,missed motorcycle; missed car,8
+Numan_-383-_jpg.rf.7707f33048d,6,1,4,1,1,bus -> truck; missed car; missed car; missed bus; missed bus,6
+Asraf_41_jpg.rf.035e57338b58c6,6,2,3,1,2,missed truck; missed car; missed car; bus -> three-wheeler,6
+Navid_470_jpg.rf.b15d4cf5c4f26,9,5,4,0,1,missed car; missed truck; missed car; missed car,5
+Navid_467_jpg.rf.94558d904fb2f,9,4,5,0,0,missed truck; missed three-wheeler; missed motorcycle; missed car; missed car,5
+135_jpg.rf.8e8044525bde197e07c,8,4,4,0,0,missed car; missed bus; missed bus; missed three-wheeler,4
+Navid_579_JPG_jpg.rf.6da7c78b4,6,3,3,0,1,missed motorcycle; missed three-wheeler; missed three-wheeler,4
+179_jpg.rf.9ef5b1db0058cc426a3,5,2,3,0,0,missed truck; missed truck; missed three-wheeler,3
+Dipto_607_jpg.rf.a7ca1af8158b8,7,4,3,0,0,missed truck; missed truck; missed bus,3
+Navid_402_jpg.rf.fd3b8fd678ec7,3,1,1,1,0,car -> truck; missed car,2
+Navid_681_jpg.rf.60ad055b64eac,6,4,2,0,0,missed three-wheeler; missed car,2
+Dipto_-333_jpg.rf.0da22366820c,1,1,0,0,1,,1
+Navid_87_jpg.rf.cc07b7a2af7952,6,5,1,0,0,missed motorcycle,1
+Dipto_521_jpg.rf.16cae361b5012,2,2,0,0,1,,1
+Numan_-204-_jpg.rf.37f34660079,3,2,1,0,0,missed car,1
+Navid_478_jpg.rf.d2a136037f4df,2,2,0,0,1,,1
+Pias-369-_jpg.rf.4f57fe5c6cb5c,2,1,1,0,0,missed truck,1
+Numan_-191-_jpg.rf.e26a485ca82,4,3,1,0,0,missed three-wheeler,1
+Dipto_549_jpg.rf.3e9295f5a3fe7,1,1,0,0,0,,0
+Navid_141_jpg.rf.c7be2813ad3a6,2,2,0,0,0,,0

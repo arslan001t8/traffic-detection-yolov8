@@ -1,0 +1,10 @@
+path: /content/drive/MyDrive/cv_project/dataset
+train: images/train
+val: images/val
+test: images/test
+names:
+- bus
+- car
+- motorcycle
+- three-wheeler
+- truck

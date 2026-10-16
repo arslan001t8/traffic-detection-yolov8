@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Traffic Object Detection</title>
+<style>
+:root{--bg:#14171c;--panel:#1c2128;--line:#2b323c;--ink:#e9edf2;--mute:#8b95a5;--lane:#f2c230}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "Segoe UI Variable","Segoe UI",system-ui,-apple-system,Roboto,sans-serif;font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+header{padding:26px 0 18px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+h1{margin:0;font-size:24px;font-weight:650;letter-spacing:-.01em}
+.tag{font-size:13px;font-weight:600;color:#14171c;background:var(--lane);padding:1px 9px;border-radius:4px}
+header p{margin:0;color:var(--mute);flex-basis:100%}
+.lane{height:4px;background:repeating-linear-gradient(90deg,var(--lane) 0 28px,transparent 28px 52px)}
+.busy .lane{animation:run .6s linear infinite}
+@keyframes run{to{background-position:52px 0}}
+@media(prefers-reduced-motion:reduce){.busy .lane{animation:none}}
+main{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:22px;padding:22px 0 24px}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:8px;min-height:340px;overflow:hidden;display:grid}
+canvas{display:block;width:100%;height:auto}
+#drop{display:grid;place-content:center;gap:6px;text-align:center;padding:24px;cursor:pointer;border:2px dashed var(--line);border-radius:8px;margin:14px}
+#drop.over,#drop:hover{border-color:var(--lane)}
+#drop strong{font-size:18px}
+#drop span{color:var(--mute)}
+.rail{display:grid;gap:18px;align-content:start}
+.rail section{border-top:1px solid var(--line);padding-top:14px}
+.rail section:first-child{border-top:0;padding-top:0}
+h2{margin:0 0 8px;font-size:15px;font-weight:650}
+label{display:flex;justify-content:space-between}
+input[type=range]{width:100%;accent-color:var(--lane)}
+.hint{margin:4px 0 0;color:var(--mute);font-size:13px}
+.btns{display:grid;gap:8px}
+button{font:inherit;font-weight:600;padding:10px 14px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+button:hover:not(:disabled){border-color:var(--mute)}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.go{background:var(--lane);border-color:var(--lane);color:#14171c}
+:focus-visible{outline:2px solid var(--lane);outline-offset:2px}
+ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+li{display:flex;align-items:center;gap:9px}
+li i{width:11px;height:11px;border-radius:3px;flex:none}
+li b{margin-left:auto}
+#counts li{padding:2px 0}
+#list li span{width:104px}
+#list li b{width:42px;text-align:right;font-weight:500;color:var(--mute)}
+#list em{flex:1;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+#list u{display:block;height:100%}
+#list{max-height:260px;overflow:auto}
+#total{font-weight:650;margin:0 0 8px}
+#err{color:#ff8a8a;margin:0}
+footer{padding:0 0 34px;color:var(--mute);font-size:13px}
+footer a{color:var(--ink)}
+</style>
+</head>
+<body>
+<div id="app">
+<div class="wrap"><header>
+  <h1>Traffic Object Detection</h1><span class="tag">YOLOv8n</span>
+  <p>Upload a street-level photo to find cars, motorcycles, buses, trucks and three-wheelers.</p>
+</header></div>
+<div class="lane"></div>
+<div class="wrap">
+<main>
+  <div class="stage">
+    <div id="drop" tabindex="0" role="button" aria-label="Choose an image">
+      <strong>Drop a traffic photo here</strong><span>or click to choose a JPG or PNG</span>
+    </div>
+    <canvas id="cv" hidden></canvas>
+  </div>
+  <aside class="rail">
+    <section>
+      <h2><label for="conf">Confidence threshold <b id="cv2">0.35</b></label></h2>
+      <input id="conf" type="range" min="0.1" max="0.9" step="0.05" value="0.35">
+      <p class="hint">Lower finds more vehicles but adds more wrong boxes.</p>
+    </section>
+    <section class="btns">
+      <button id="go" class="go" disabled>Detect vehicles</button>
+      <button id="change" disabled>Choose another image</button>
+      <button id="save" disabled>Save result as PNG</button>
+      <p id="err" role="alert" hidden></p>
+    </section>
+    <section id="res" hidden>
+      <p id="total"></p>
+      <ul id="counts"></ul>
+    </section>
+    <section id="det" hidden>
+      <h2>Detections</h2>
+      <ul id="list"></ul>
+    </section>
+  </aside>
+</main>
+<footer>Trained on 175 street-level images, so small, distant or hidden vehicles can be missed. People are not detected. API docs are at <a href="/docs">/docs</a>.</footer>
+</div>
+</div>
+<input id="file" type="file" accept="image/*" hidden>
+<script>
+const $=s=>document.querySelector(s);
+const COL={car:'#4da3ff',motorcycle:'#ffb347',bus:'#ff6b6b',truck:'#b58cff','three-wheeler':'#3ddc97'};
+const cv=$('#cv'),drop=$('#drop'),inp=$('#file'),conf=$('#conf'),go=$('#go');
+let file=null,img=null;
+conf.oninput=()=>$('#cv2').textContent=(+conf.value).toFixed(2);
+const pick=()=>inp.click();
+drop.onclick=pick;$('#change').onclick=pick;
+drop.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick()}};
+inp.onchange=()=>{setFile(inp.files[0]);inp.value=''};
+['dragenter','dragover'].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.add('over')}));
+['dragleave','drop'].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.remove('over')}));
+drop.addEventListener('drop',e=>setFile(e.dataTransfer.files[0]));
+function setFile(f){
+  if(!f||!f.type.startsWith('image/'))return;
+  file=f;img=new Image();
+  img.onload=()=>{draw(null);drop.hidden=true;cv.hidden=false;go.disabled=false;$('#change').disabled=false;
+    $('#save').disabled=true;$('#res').hidden=true;$('#det').hidden=true;$('#err').hidden=true};
+  img.src=URL.createObjectURL(f);
+}
+function draw(d){
+  const x=cv.getContext('2d');cv.width=img.naturalWidth;cv.height=img.naturalHeight;x.drawImage(img,0,0);
+  if(!d)return;
+  const s=Math.max(1,cv.width/640),fs=Math.round(13*s);
+  x.lineWidth=2*s;x.font=`600 ${fs}px "Segoe UI",system-ui,sans-serif`;x.textBaseline='top';
+  d.detections.forEach(t=>{
+    const [a,b,c,e]=t.bbox_xyxy,col=COL[t.class]||'#fff';
+    x.strokeStyle=col;x.strokeRect(a,b,c-a,e-b);
+    const txt=`${t.class} ${Math.round(t.confidence*100)}%`,tw=x.measureText(txt).width+8*s,th=fs+6*s,ty=b-th<0?b:b-th;
+    x.fillStyle=col;x.fillRect(a,ty,tw,th);x.fillStyle='#14171c';x.fillText(txt,a+4*s,ty+3*s);
+  });
+}
+function render(d){
+  const n=d.num_detections,k=t=>COL[t]||'#fff';
+  $('#total').textContent=n?`${n} vehicle${n>1?'s':''} found`:'No vehicles found at this threshold';
+  $('#counts').innerHTML=Object.entries(d.counts).map(([t,v])=>`<li><i style="background:${k(t)}"></i>${t}<b>${v}</b></li>`).join('');
+  $('#list').innerHTML=[...d.detections].sort((p,q)=>q.confidence-p.confidence).map(t=>
+    `<li><i style="background:${k(t.class)}"></i><span>${t.class}</span><em><u style="width:${t.confidence*100}%;background:${k(t.class)}"></u></em><b>${Math.round(t.confidence*100)}%</b></li>`).join('');
+  $('#res').hidden=false;$('#det').hidden=!n;$('#save').disabled=false;
+}
+go.onclick=async()=>{
+  const app=$('#app'),err=$('#err');
+  go.disabled=true;go.textContent='Detecting...';err.hidden=true;app.classList.add('busy');
+  try{
+    const fd=new FormData();fd.append('file',file);
+    const r=await fetch('/predict?conf='+conf.value,{method:'POST',body:fd});
+    if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error(j.detail||r.statusText)}
+    const d=await r.json();draw(d);render(d);
+  }catch(e){err.textContent='Detection failed: '+e.message+'. Check that the server is still running.';err.hidden=false}
+  app.classList.remove('busy');go.disabled=false;go.textContent='Detect vehicles';
+};
+$('#save').onclick=()=>cv.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='detections.png';a.click()});
+</script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+model,split,precision,recall,mAP50,mAP50-95
+yolov8n (baseline),val,0.545,0.426,0.424,0.261
+yolov8n (baseline),test,0.586,0.458,0.476,0.274
+yolov8s,val,0.602,0.393,0.417,0.261
+yolov8s,test,0.594,0.431,0.463,0.263
